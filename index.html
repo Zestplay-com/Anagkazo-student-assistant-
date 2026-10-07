@@ -105,7 +105,7 @@
   </div>
 
   <script>
-    document.getElementById('assignmentForm').addEventListener('submit', async function(e) {
+    // Vercel deployment: the Gemini API key is kept server-side in GEMINI_API_KEY.\n    // Never place the Gemini key in this HTML file.\n    document.getElementById('assignmentForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const studentName = document.getElementById('studentName').value.trim();
