@@ -1,0 +1,9 @@
+{
+  "name": "anagkazo-student-assistant",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Anagkazo assignment generator powered by Gemini through a Vercel serverless function",
+  "scripts": {
+    "build": "echo Vercel deployment ready"
+  }
+}
