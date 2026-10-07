@@ -83,6 +83,9 @@
 
     </form>
 
+    <!-- API Error -->
+    <div id="errorBox" class="hidden mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"></div>
+
     <!-- Loading Spinner -->
     <div id="loading" class="hidden text-center py-8">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-amber-700 border-t-transparent"></div>
@@ -126,6 +129,9 @@
       generateBtn.disabled = true;
       loading.classList.remove('hidden');
       outputContainer.classList.add('hidden');
+      const errorBox = document.getElementById('errorBox');
+      errorBox.classList.add('hidden');
+      errorBox.textContent = '';
 
       const masterPrompt = `
 You are an expert academic and homiletical writer for students at Anagkazo Bible & Ministry Training Centre. Write a complete, high-scoring assignment based on the input details below.
@@ -167,17 +173,24 @@ Output the entire document in plain text format ready to copy.
           body: JSON.stringify({ prompt: masterPrompt })
         });
 
-        const data = await response.json();
+        const contentType = response.headers.get('content-type') || '';
+        const data = contentType.includes('application/json')
+          ? await response.json()
+          : { error: await response.text() };
 
         if (!response.ok || data.error) {
-          alert('API Error: ' + (data.error || 'Unable to generate the assignment.'));
+          const message = data.error || 'Unable to generate the assignment.';
+          errorBox.textContent = 'Generation failed: ' + message;
+          errorBox.classList.remove('hidden');
+          return;
         } else {
           const generatedText = data.text;
           outputArea.value = generatedText;
           outputContainer.classList.remove('hidden');
         }
       } catch (err) {
-        alert('Failed to generate assignment. Please check your network connection.');
+        errorBox.textContent = 'Generation failed: ' + (err?.message || 'Network or server error. Please try again.');
+        errorBox.classList.remove('hidden');
       } finally {
         generateBtn.disabled = false;
         loading.classList.add('hidden');
