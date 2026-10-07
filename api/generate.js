@@ -4,18 +4,22 @@ module.exports = async function handler(req, res) {
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
-
   if (!apiKey) {
     return res.status(500).json({
-      error: "GEMINI_API_KEY is not configured on the server."
+      error: "Gemini API key is not configured. Add GEMINI_API_KEY in Vercel Project Settings → Environment Variables, then redeploy."
     });
   }
 
   try {
-    const { prompt } = req.body || {};
+    const body = req.body || {};
+    const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
 
-    if (!prompt || typeof prompt !== "string") {
+    if (!prompt) {
       return res.status(400).json({ error: "A prompt is required." });
+    }
+
+    if (prompt.length > 100000) {
+      return res.status(413).json({ error: "The assignment request is too large." });
     }
 
     const response = await fetch(
@@ -27,11 +31,11 @@ module.exports = async function handler(req, res) {
           "x-goog-api-key": apiKey
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }]
-            }
-          ]
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 12000
+          }
         })
       }
     );
@@ -44,10 +48,10 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const text =
-      data?.candidates?.[0]?.content?.parts
-        ?.map((part) => part.text || "")
-        .join("") || "";
+    const text = data?.candidates?.[0]?.content?.parts
+      ?.map(part => part.text || "")
+      .join("")
+      .trim();
 
     if (!text) {
       return res.status(502).json({
@@ -57,8 +61,9 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({ text });
   } catch (error) {
+    console.error("Gemini generation error:", error);
     return res.status(500).json({
-      error: error?.message || "Server error while generating the assignment."
+      error: "The assignment could not be generated right now. Please try again."
     });
   }
-}
+};
