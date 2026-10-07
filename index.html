@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anagkazo Assignment Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 p-4 md:p-8">
+
+  <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6 md:p-8 border border-slate-200">
+    
+    <!-- Header -->
+    <div class="text-center border-b pb-6 mb-6">
+      <h1 class="text-2xl font-bold text-amber-800 tracking-wide uppercase">Anagkazo Assignment Generator</h1>
+      <p class="text-sm text-slate-500 mt-1">Generate High-Scoring Homiletical Assignments & Sermons</p>
+    </div>
+
+    <!-- Student Form -->
+    <form id="assignmentForm" class="space-y-4">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Student Full Name</label>
+          <input type="text" id="studentName" required placeholder="e.g. Bridget Nabaweesi" 
+                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Index Number</label>
+          <input type="text" id="indexNumber" required placeholder="e.g. 701499" 
+                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Class Batch</label>
+          <input type="text" id="classYear" required placeholder="e.g. CLASS OF 2028A" 
+                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Course / Rotation Name</label>
+          <input type="text" id="courseName" placeholder="e.g. Practical Approaches to Church Growth" 
+                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">Assignment Topic Title</label>
+        <input type="text" id="topic" required placeholder="e.g. FOUR QUESTIONS YOU MUST PREPARE FOR" 
+               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Main Textbook / Bishop Dag Book</label>
+          <input type="text" id="bookTitle" required placeholder="e.g. Tell Them / Manthano" 
+                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Chapter Number(s)</label>
+          <input type="text" id="chapterNumber" placeholder="e.g. Chapter 1 or Chapters 1-3" 
+                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">Assignment Points / Outline</label>
+        <textarea id="pointsList" rows="5" required placeholder="Paste or list the exact points and primary scriptures to cover..." 
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">Personal Ministry Context (Optional)</label>
+        <input type="text" id="personalContext" placeholder="e.g. Saturday outreach in Mampong, hostel leader experiences, etc." 
+               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none text-sm">
+      </div>
+
+      <button type="submit" id="generateBtn" 
+              class="w-full py-3 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-lg transition duration-200 shadow-md">
+        🚀 GENERATE HIGH-SCORE ASSIGNMENT
+      </button>
+
+    </form>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="hidden text-center py-8">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-amber-700 border-t-transparent"></div>
+      <p class="text-sm font-semibold text-amber-800 mt-2">Writing your Anagkazo assignment... Please wait!</p>
+    </div>
+
+    <!-- Result Output -->
+    <div id="outputContainer" class="hidden mt-8 border-t pt-6">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-bold text-slate-800">Generated Assignment Output</h2>
+        <div class="space-x-2">
+          <button onclick="copyOutput()" class="px-3 py-1.5 bg-slate-800 text-white text-xs rounded hover:bg-slate-700">📋 Copy All</button>
+          <button onclick="downloadOutput()" class="px-3 py-1.5 bg-amber-700 text-white text-xs rounded hover:bg-amber-800">📥 Download .TXT</button>
+        </div>
+      </div>
+      <textarea id="outputArea" rows="20" readonly 
+                class="w-full p-4 bg-slate-50 border rounded-lg font-mono text-xs text-slate-800 focus:outline-none"></textarea>
+    </div>
+
+  </div>
+
+  <script>
+    // Embedded API key variable
+    const API_KEY = "YOUR_ACTUAL_GEMINI_API_KEY_HERE";
+
+    document.getElementById('assignmentForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      if (!API_KEY || API_KEY === "AQ.Ab8RN6JqyYK8QKeeMpoTHsiRcefTDvgZW_7jg02GaoH1tTHXdQ") {
+        alert("AQ.Ab8RN6JqyYK8QKeeMpoTHsiRcefTDvgZW_7jg02GaoH1tTHXdQ");
+        return;
+      }
+
+      const studentName = document.getElementById('studentName').value.trim();
+      const indexNumber = document.getElementById('indexNumber').value.trim();
+      const classYear = document.getElementById('classYear').value.trim();
+      const courseName = document.getElementById('courseName').value.trim();
+      const topic = document.getElementById('topic').value.trim();
+      const bookTitle = document.getElementById('bookTitle').value.trim();
+      const chapterNumber = document.getElementById('chapterNumber').value.trim();
+      const pointsList = document.getElementById('pointsList').value.trim();
+      const personalContext = document.getElementById('personalContext').value.trim();
+
+      const generateBtn = document.getElementById('generateBtn');
+      const loading = document.getElementById('loading');
+      const outputContainer = document.getElementById('outputContainer');
+      const outputArea = document.getElementById('outputArea');
+
+      generateBtn.disabled = true;
+      loading.classList.remove('hidden');
+      outputContainer.classList.add('hidden');
+
+      const masterPrompt = `
+You are an expert academic and homiletical writer for students at Anagkazo Bible & Ministry Training Centre. Write a complete, high-scoring assignment based on the input details below.
+
+INPUT DETAILS:
+- Student Name: ${studentName}
+- Index Number: ${indexNumber}
+- Class Year: ${classYear}
+- Course/Rotation: ${courseName}
+- Assignment Topic: ${topic}
+- Main Textbook / Bishop Dag Book: ${bookTitle}
+- Chapter Number: ${chapterNumber}
+- Points to Cover:
+${pointsList}
+- Personal Context: ${personalContext}
+
+REQUIRED ANAGKAZO STRUCTURE:
+1. HEADER BLOCK: Include ANAGKAZO BIBLE & MINISTRY TRAINING CENTRE, Student Name, Index Number, Class Year, Date, and Topic.
+2. DEDICATION & ACKNOWLEDGEMENT SECTIONS: Dedicated to God and Chancellor Bishop Dag Heward-Mills.
+3. INTRODUCTION: Preaching opening ("Welcome to Church..."), dictionary definition or Greek word analysis, foundational KJV scripture with exegesis, Chancellor citation ("Chancellor in his book..."), and a relatable Anagkazo student story.
+4. BODY POINTS (For each requested point):
+   - Point Headline clearly numbered.
+   - Primary KJV Scripture with full verse-by-verse breakdown.
+   - SECONDARY SUPPORTING SCRIPTURE: Must cite a second, DIFFERENT KJV scripture with full explanation.
+   - CHANCELLOR CITATION: Explicitly cite Chancellor Bishop Dag Heward-Mills from his books or lectures.
+   - SHORT ANAGKAZO PERSONAL STORY: Relatable story directly connected to the point (e.g. Saturday outreach, campus life, student ministry).
+   - PREACHING HOOKS: Include expressions like "WATCH!", "NOTE:", "WOW! What a blessing!".
+5. CONCLUSION: Romans 10:14-15 or similar KJV scripture explained, summary list of all points, and preaching closing.
+6. ALTAR CALL: Full invitation with John 14:6 or Matthew 28:18 and written sinner's prayer.
+7. REFERENCES SECTION: Itemized list of all cited Bishop Dag Heward-Mills books and Bible versions used.
+
+Output the entire document in plain text format ready to copy.
+`;
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: masterPrompt }] }]
+          })
+        });
+
+        const data = await response.json();
+        if (data.error) {
+          alert('API Error: ' + data.error.message);
+        } else {
+          const generatedText = data.candidates[0].content.parts[0].text;
+          outputArea.value = generatedText;
+          outputContainer.classList.remove('hidden');
+        }
+      } catch (err) {
+        alert('Failed to generate assignment. Please check your network connection.');
+      } finally {
+        generateBtn.disabled = false;
+        loading.classList.add('hidden');
+      }
+    });
+
+    function copyOutput() {
+      const outputArea = document.getElementById('outputArea');
+      outputArea.select();
+      document.execCommand('copy');
+      alert('Assignment copied to clipboard!');
+    }
+
+    function downloadOutput() {
+      const text = document.getElementById('outputArea').value;
+      const topic = document.getElementById('topic').value || 'Assignment';
+      const blob = new Blob([text], { type: 'text/plain' });
+      const anchor = document.createElement('a');
+      anchor.download = `${topic.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_anagkazo.txt`;
+      anchor.href = window.URL.createObjectURL(blob);
+      anchor.click();
+    }
+  </script>
+</body>
+</html>
